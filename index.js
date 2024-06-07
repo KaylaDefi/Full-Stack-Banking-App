@@ -1,65 +1,101 @@
-function Spa() {
-  const [users, setUsers] = React.useState([{name:'abel', email:'abel@mit.edu', password:'secret', balance:100}]);
-  const [currentUser, setCurrentUser] = React.useState(() => {
-    // Retrieve user data from localStorage or sessionStorage
-    const savedUser = localStorage.getItem('currentUser');
-    console.log("Rehydrating currentUser from localStorage:", savedUser ? JSON.parse(savedUser) : null);
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+var express = require('express');
+var app     = express();
+var cors    = require('cors');
+var dal     = require('./dal.js');
+const e = require('express');
 
-  const updateUserBalance = (email, amount) => {
-    const updatedUsers = users.map(user => {
-      if (user.email === email) {
-        return { ...user, balance: user.balance + amount };
-      }
-      return user;
+// used to serve static files from public directory
+app.use(express.static('public'));
+app.use(cors());
+app.use(express.json()); 
+
+dal.connectToDatabase()
+   .then(() => {
+       console.log('Database is ready');
+       // Start express server or other application logic
+   })
+   .catch(err => {
+       console.error('Database connection failed:', err);
+       process.exit(1); // Exit the app if the database connection fails
+   });
+
+// create user account
+app.post('/account/create', function (req, res) {
+    const { name, email, password } = req.body; // Assuming you send these in the body of the POST request
+
+    dal.find(email).then(users => {
+        if (users.length > 0) {
+            res.status(409).send('User already exists');
+        } else {
+            dal.create(name, email, password).then(user => {
+                res.status(201).send(user);
+            });
+        }
     });
-    setUsers(updatedUsers);
+});
 
-    const updatedCurrentUser = updatedUsers.find(user => user.email === email);
-    if (updatedCurrentUser) {
-      setCurrentUser(updatedCurrentUser);
-      localStorage.setItem('currentUser', JSON.stringify(updatedCurrentUser));
-    }
-  };
-  
-  const loginUser = (email) => {
-    const user = users.find(u => u.email === email);
-    if (user) {
-      setCurrentUser(user);
-      localStorage.setItem('currentUser', JSON.stringify(user));
-      console.log("User logged in and set in context and localStorage:", user);
-    } else {
-      console.error("User not found");
-    }
-  };
-  
-  const logoutUser = () => {
-    setCurrentUser(null);
-    localStorage.removeItem('currentUser');
-    // Also reset the hash to redirect to the home page or login page
-    window.location.hash = '#/';
-  };
 
-    return (
-      <HashRouter>
-        <NavBar/>
-        <UserContext.Provider value={{ users, setUsers, currentUser, setCurrentUser, updateUserBalance, loginUser, logoutUser, }}>
-          <div className="container" style={{padding: "20px"}}>
-            <Route path="/" exact component={Home} />
-            <Route path="/CreateAccount/" component={CreateAccount} />
-            <Route path="/login/" component={Login} />
-            <Route path="/deposit/" component={Deposit} />
-            <Route path="/withdraw/" component={Withdraw} />
-            <Route path="/alldata/" component={AllData} />
-          </div>
-        </UserContext.Provider>      
-      </HashRouter>
-    );
-  }
-  
-  ReactDOM.render(
-    <Spa/>,
-    document.getElementById('root')
-  );
-  
+// login user 
+app.post('/account/login', function (req, res) {
+    const { email, password } = req.body;
+
+    dal.findOne(email).then(user => {
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        if (user.password === password) {
+            res.json({ message: 'Login successful', user });
+        } else {
+            res.status(401).json({ message: 'Login failed: wrong credentials' });
+        }
+    }).catch(err => {
+        res.status(500).json({ message: 'Server error', error: err });
+    });
+});
+
+
+
+// find user account
+app.get('/account/find/:email', function (req, res) {
+
+    dal.find(req.params.email).
+        then((user) => {
+            console.log(user);
+            res.send(user);
+    });
+});
+
+// find one user by email - alternative to find
+app.get('/account/findOne/:email', function (req, res) {
+
+    dal.findOne(req.params.email).
+        then((user) => {
+            console.log(user);
+            res.send(user);
+    });
+});
+
+
+// update - deposit/withdraw amount
+app.patch('/account/update', function (req, res) {
+    const { email, amount } = req.body;
+
+    dal.update(email, Number(amount)).then(response => {
+        res.send(response);
+    });
+});
+
+
+// all accounts
+app.get('/account/all', function (req, res) {
+
+    dal.all().
+        then((docs) => {
+            console.log(docs);
+            res.send(docs);
+    });
+});
+
+var port = 3000;
+app.listen(port);
+console.log('Running on port: ' + port);

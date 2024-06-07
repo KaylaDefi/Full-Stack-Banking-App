@@ -1,0 +1,17 @@
+{
+  "name": "bad-bank-copy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "k.r.s13@outlook.com",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "lowdb": "^7.0.1",
+    "mongodb": "^6.7.0"
+  }
+}

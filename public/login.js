@@ -2,27 +2,36 @@ function Login() {
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
     const [status, setStatus] = React.useState('');
-    const [showSuccess, setShowSuccess] = React.useState(false); // New state for showing login success message
-    const { users, setCurrentUser, loginUser } = React.useContext(UserContext);
+    const [showSuccess, setShowSuccess] = React.useState(false);
+    const { setCurrentUser } = React.useContext(UserContext);
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        const user = users.find(user => user.email === email && user.password === password);
-        if (user) {
-            setCurrentUser(user); // Update the current user in the context
-            loginUser(user); // Presuming loginUser is a function in your context to handle user login
-            setStatus('Login successful');
-            setShowSuccess(true);
-
-        } else {
-            setStatus('Login failed: Incorrect email or password');
-            setTimeout(() => setStatus(''), 3000); // Clear status after some time
+        try {
+            const response = await fetch('/account/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await response.json();
+            if (response.ok && data.user) {
+                setCurrentUser(data.user); // Set current user in context
+                setStatus('Login successful');
+                setShowSuccess(true);
+            } else {
+                setStatus(data.message || 'Login failed: Incorrect email or password');
+                setTimeout(() => setStatus(''), 3000); // Clear status after some time
+            }
+        } catch (error) {
+            console.error('Login failed:', error);
+            setStatus('Login failed: Unable to connect');
+            setTimeout(() => setStatus(''), 3000);
         }
     };
 
     const navigate = (path) => {
         window.location.hash = path;
-    }
+    };
 
     const loginForm = (
         <>
@@ -45,6 +54,7 @@ function Login() {
                 required
             /><br/>
             <button type="submit" className="btn btn-light" onClick={handleLogin}>Login</button>
+            <p>{status}</p>
         </>
     );
 
@@ -64,6 +74,7 @@ function Login() {
         />
     );
 }
+
 
 
 
