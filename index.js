@@ -41,15 +41,15 @@ app.post('/account/login', function (req, res) {
 
     dal.findOne(email).then(user => {
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ success: false, message: 'User not found' });
         }
         if (user.password === password) {
-            res.json({ message: 'Login successful', user });
+            res.json({ success: true, message: 'Login successful', user });
         } else {
-            res.status(401).json({ message: 'Login failed: wrong credentials' });
+            res.status(401).json({ success: false, message: 'Login failed: wrong credentials' });
         }
     }).catch(err => {
-        res.status(500).json({ message: 'Server error', error: err });
+        res.status(500).json({ success: false, message: 'Server error', error: err });
     });
 });
 
@@ -81,7 +81,9 @@ app.patch('/account/update', function (req, res) {
     const { email, amount } = req.body;
 
     dal.update(email, Number(amount)).then(response => {
-        res.send(response);
+        res.json({ success: true, response });
+    }).catch(err => {
+        res.status(500).json({ success: false, message: 'Update error', error: err });
     });
 });
 

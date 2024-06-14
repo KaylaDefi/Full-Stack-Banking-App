@@ -1,9 +1,6 @@
 function Spa() {
   const [users, setUsers] = React.useState([]);
-  const [currentUser, setCurrentUser] = React.useState(() => {
-    const savedUser = localStorage.getItem('currentUser');
-    return savedUser ? JSON.parse(savedUser) : null;
-  });
+  const [currentUser, setCurrentUser] = React.useState(null);
 
   React.useEffect(() => {
     async function loadUsers() {
@@ -28,7 +25,6 @@ function Spa() {
       const data = await response.json();
       if (data.success) {
         setCurrentUser(data.user);
-        localStorage.setItem('currentUser', JSON.stringify(data.user));
         console.log("User logged in:", data.user);
       } else {
         console.error("Login failed:", data.message);
@@ -40,7 +36,6 @@ function Spa() {
 
   const logoutUser = () => {
     setCurrentUser(null);
-    localStorage.removeItem('currentUser');
     window.location.hash = '#/';
   };
 
@@ -53,7 +48,7 @@ function Spa() {
       });
       const data = await response.json();
       if (data.success) {
-        console.log('Account updated successfully:', data);
+        console.log('Account updated successfully:', data.response);
         // Optionally refresh user data or update state here
       } else {
         console.error('Account update failed:', data.message);
@@ -84,5 +79,7 @@ ReactDOM.render(
   <Spa />,
   document.getElementById('root')
 );
+
+
 
   
