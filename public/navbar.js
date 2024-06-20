@@ -1,5 +1,10 @@
-function NavBar(){
+function NavBar() {
   const NavLink = ReactRouterDOM.NavLink;
+  const context = React.useContext(UserContext);
+  const currentUser = context ? context.currentUser : null;
+  const logoutUser = context ? context.logoutUser : null;
+
+  console.log('NavBar Current User:', currentUser);
 
   return(
     <>
@@ -10,7 +15,7 @@ function NavBar(){
       </button>
       <div className="collapse navbar-collapse" id="navbarNav">
         <ul className="navbar-nav">
-        <li className="nav-item">
+          <li className="nav-item">
             <NavLink className="nav-link" to="/" exact activeClassName="active" title="Go to homepage.">Home</NavLink>
           </li>
           <li className="nav-item">
@@ -29,6 +34,14 @@ function NavBar(){
             <NavLink className="nav-link" to="/alldata/" activeClassName="active" title="View all user inputs (bank staff only).">AllData</NavLink>
           </li>          
         </ul>
+        {currentUser && (
+          <div className="ml-auto d-flex align-items-center">
+            <span className="navbar-text mr-3">
+              Welcome, {currentUser.name}
+            </span>
+            <button className="btn btn-outline-danger" onClick={logoutUser}>Logout</button>
+          </div>
+        )}
       </div>
     </nav>
     <style>
@@ -41,8 +54,12 @@ function NavBar(){
           color: #007bff !important;
           background-color: #ddd;
         }
+        .navbar-text {
+          margin-right: 15px;
+        }
       `}
     </style>
     </>
   );
 }
+

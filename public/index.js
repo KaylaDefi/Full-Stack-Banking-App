@@ -86,46 +86,47 @@ function Spa() {
 };
 
 const handleWithdraw = async (email, amount) => {
-  console.log(`Attempting withdraw for ${email} with amount ${amount}`);
   try {
-    const response = await fetch('/account/withdraw', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, amount })
-    });
-    const data = await response.json();
-    if (data.success) {
-      console.log("Withdraw successful, updating current user with:", data.updatedUser);
-      setCurrentUser(data.updatedUser);
-      setUsers(prevUsers => prevUsers.map(user => user.email === email ? data.updatedUser : user));
-      console.log('Updated user:', data.updatedUser);
+      const response = await fetch('/account/withdraw', {
+          method: 'PATCH',
+          headers: {
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, amount })
+      });
+
+      if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to withdraw');
+      }
+
+      const data = await response.json();
       return data.updatedUser;
-    } else {
-      console.error('Withdraw failed:', data.message);
-      return null;
-    }
-  } catch (error) {
-    console.error('Withdraw error:', error);
-    return null;
+  } catch (err) {
+      console.error('Error making withdraw:', err);
+      throw err;
   }
 };
 
+React.useEffect(() => {
+  console.log('Current User:', currentUser);
+}, [currentUser]);
 
-  return (
-    <HashRouter>
-      <NavBar/>
-      <UserContext.Provider value={{ users, setUsers, currentUser, setCurrentUser, loginUser, logoutUser, handleAccountUpdate, handleDeposit, handleWithdraw }}>
-        <div className="container" style={{ padding: "20px" }}>
-          <Route path="/" exact component={Home} />
-          <Route path="/CreateAccount/" component={CreateAccount} />
-          <Route path="/login/" component={Login} />
-          <Route path="/deposit/" component={Deposit} />
-          <Route path="/withdraw/" component={Withdraw} />
-          <Route path="/alldata/" component={AllData} />
-        </div>
-      </UserContext.Provider>
-    </HashRouter>
-  );
+return (
+  <HashRouter>
+    <UserContext.Provider value={{ users, setUsers, currentUser, setCurrentUser, loginUser, logoutUser, handleAccountUpdate, handleDeposit, handleWithdraw }}>
+      <NavBar />
+      <div className="container" style={{ padding: "20px" }}>
+        <Route path="/" exact component={Home} />
+        <Route path="/CreateAccount/" component={CreateAccount} />
+        <Route path="/login/" component={Login} />
+        <Route path="/deposit/" component={Deposit} />
+        <Route path="/withdraw/" component={Withdraw} />
+        <Route path="/alldata/" component={AllData} />
+      </div>
+    </UserContext.Provider>
+  </HashRouter>
+);
 }
 
 ReactDOM.render(
