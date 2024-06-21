@@ -63,6 +63,7 @@ app.post('/account/addtype', async (req, res) => {
         const newAccount = {
             type,
             balance: 0,
+            interestRate: type === 'Savings' ? 0.02 : 0,
             accountNumber,
             createdAt: new Date(),
             updatedAt: new Date()
@@ -72,8 +73,8 @@ app.post('/account/addtype', async (req, res) => {
         if (!user) {
             return res.status(404).json({ success: false, message: 'User not found' });
         }
-
         user.accounts.push(newAccount);
+        user.updatedAt = new Date();
         await user.save();
 
         res.status(201).json({ success: true, user });
