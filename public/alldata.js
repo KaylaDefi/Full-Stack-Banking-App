@@ -36,7 +36,21 @@ function AllData() {
                 <h5 className="card-title">{user.name}</h5>
                 <p className="card-text">Email: {user.email}</p>
                 <p className="card-text">Password: {user.password}</p>
-                <p className="card-text">Balance: ${user.balance.toFixed(2)}</p>
+                {user.accounts && user.accounts.length > 0 ? (
+                  <div>
+                    <h6>Accounts:</h6>
+                    {user.accounts.map((account, accIndex) => (
+                      <div key={accIndex}>
+                        <p>Type: {account.type}</p>
+                        <p>Balance: ${account.balance.toFixed(2)}</p>
+                        <p>Account Number: {account.accountNumber}</p>
+                        <hr />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No accounts found.</p>
+                )}
               </div>
             </div>
           </div>
@@ -45,5 +59,3 @@ function AllData() {
     </div>
   );
 }
-
-  

@@ -14,33 +14,75 @@ const connectToDatabase = async () => {
     }
 };
 
+// Define Account Schema and Model
+const accountSchema = new mongoose.Schema({
+    type: { type: String, required: true, enum: ['Checking', 'Savings'] },
+    balance: { type: Number, required: true, default: 0 },
+    interestRate: { type: Number, default: 0 },
+    accountNumber: { type: String, required: true, unique: true },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
+});
+
 // Define User Schema and Model
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    balance: { type: Number, default: 0 },
+    accounts: [accountSchema],
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
 
 const User = mongoose.model('User', userSchema);
+const Account = mongoose.model('Account', accountSchema);
 
-// Database operations using Mongoose models
+// Generate a unique account number
+const generateAccountNumber = () => {
+    return 'ACC' + Math.floor(1000000000 + Math.random() * 9000000000);
+};
+
 const create = async (name, email, password) => {
     try {
         const hashedPassword = await bcrypt.hash(password, 10); // Hash the password with salt rounds of 10
-        const user = new User({ 
-            name, 
-            email, 
-            password: hashedPassword, 
-            balance: 0,
-            createdAt: new Date(), 
-            updatedAt: new Date() 
+        const user = new User({
+            name,
+            email,
+            password: hashedPassword,
+            createdAt: new Date(),
+            updatedAt: new Date()
         });
-        return await user.save();
+
+        await user.save();
+        return user;
     } catch (err) {
-        console.error('Error inserting document:', err);
+        console.error('Error creating user:', err);
+        throw err;
+    }
+};
+
+const addAccountType = async (email, accountType) => {
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            throw new Error('User not found');
+        }
+        if (user.accounts.some(account => account.type === accountType)) {
+            throw new Error(`User already has a ${accountType} account`);
+        }
+
+        const newAccount = {
+            type: accountType,
+            balance: 0,
+            accountNumber: generateAccountNumber(),
+            interestRate: accountType === 'Savings' ? 0.01 : 0 // 1% interest rate for savings
+        };
+
+        user.accounts.push(newAccount);
+        await user.save();
+        return user;
+    } catch (err) {
+        console.error('Error adding account type:', err);
         throw err;
     }
 };
@@ -62,20 +104,6 @@ const findOne = async (email) => {
         return user;
     } catch (err) {
         console.error('Error fetching user:', err);
-        throw err;
-    }
-};
-
-const update = async (email, amount) => {
-    try {
-        const user = await User.findOneAndUpdate(
-            { email },
-            { $inc: { balance: amount }, $set: { updatedAt: new Date() } },
-            { new: true }
-        ).exec();
-        return user;
-    } catch (err) {
-        console.error('Error updating user:', err);
         throw err;
     }
 };
@@ -121,4 +149,22 @@ const all = async () => {
     }
 };
 
-module.exports = { connectToDatabase, create, findOne, find, update, deposit, withdraw, all, User };
+const calculateInterest = async () => {
+    try {
+        const users = await User.find({ 'accounts.type': 'Savings' });
+        for (const user of users) {
+            user.accounts.forEach(account => {
+                if (account.type === 'Savings') {
+                    account.balance += account.balance * account.interestRate;
+                }
+            });
+            await user.save();
+        }
+        console.log('Interest added to savings accounts');
+    } catch (err) {
+        console.error('Error adding interest to savings accounts:', err);
+        throw err;
+    }
+};
+
+module.exports = { connectToDatabase, create, findOne, find, generateAccountNumber, deposit, withdraw, all, calculateInterest, addAccountType, User, Account };

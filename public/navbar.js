@@ -32,7 +32,12 @@ function NavBar() {
           </li>
           <li className="nav-item">
             <NavLink className="nav-link" to="/alldata/" activeClassName="active" title="View all user inputs (bank staff only).">AllData</NavLink>
-          </li>          
+          </li>   
+          {currentUser && (
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/profile/" activeClassName="active" title="View and update your profile.">Profile</NavLink>
+              </li>
+            )}       
         </ul>
         {currentUser && (
           <div className="ml-auto d-flex align-items-center">

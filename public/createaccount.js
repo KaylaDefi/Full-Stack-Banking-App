@@ -5,6 +5,7 @@ function CreateAccount() {
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
     const [isFormValid, setIsFormValid] = React.useState(true);
+    const [accountCreated, setAccountCreated] = React.useState(false);
     const { setUsers } = React.useContext(UserContext);
   
     function validate(field, label) {
@@ -49,7 +50,9 @@ function CreateAccount() {
           if (response.ok) {
             const data = await response.json();
             setUsers(prevUsers => [...prevUsers, data]);
+            setAccountCreated(true);
             setShow(false);
+            console.log('Account successfully created');
           } else {
             const errorData = await response.json();
             setStatus(`Error: ${errorData.message}`);
@@ -64,15 +67,36 @@ function CreateAccount() {
       }
     }
   
+    async function handleAccountTypeSelection(type) {
+      try {
+        const response = await fetch('/account/addtype', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, type })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setStatus(`Success: ${type} Account Created!`);
+          setTimeout(() => {
+            window.location.hash = '#/login'; // Redirect user to login after account type creation
+          }, 2000);
+        } else {
+          const errorData = await response.json();
+          setStatus(`Error: ${errorData.message}`);
+          setTimeout(() => setStatus(''), 3000);
+        }
+      } catch (error) {
+        setStatus('Error: Unable to create account type. Please try again later.');
+        setTimeout(() => setStatus(''), 3000);
+      }
+    }
+  
     function clearForm() {
       setName('');
       setEmail('');
       setPassword('');
       setShow(true);
-    }
-  
-    function navigateToLogin() {
-      window.location.hash = '#/login/';
+      setAccountCreated(false);
     }
   
     return (
@@ -90,15 +114,16 @@ function CreateAccount() {
             <input type="password" className="form-control" id="password" placeholder="Enter password" value={password} onChange={e => { setPassword(e.currentTarget.value); setIsFormValid(true); }} /><br />
             <button type="submit" className="btn btn-light" onClick={handleCreate} disabled={!isFormValid}>Create Account</button>
           </>
-        ) : (
+        ) : accountCreated ? (
           <>
             <h5>Success: Account Created!</h5>
-            <button type="button" className="btn btn-light mb-2" onClick={navigateToLogin}>Login</button>
-            <br />
-            <button type="button" className="btn btn-light" onClick={clearForm}>Add another account</button>
+            <p>Select account type:</p>
+            <button className="btn btn-primary" onClick={() => handleAccountTypeSelection('Checking')}>Checking Account</button>
+            <button className="btn btn-secondary" onClick={() => handleAccountTypeSelection('Savings')}>Savings Account</button>
           </>
-        )}
+        ) : null}
       />
     );
   }
+  
   

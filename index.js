@@ -21,24 +21,66 @@ dal.connectToDatabase()
    });
 
 // Create user account
-app.post('/account/create', function (req, res) {
+app.post('/account/create', async (req, res) => {
     const { name, email, password } = req.body;
     console.log('Creating user:', { name, email, password });
 
-    dal.find(email).then(users => {
-        if (users.length > 0) {
+    try {
+        // Check if user already exists
+        const existingUsers = await dal.find(email);
+        if (existingUsers.length > 0) {
             console.log('User already exists:', email);
-            res.status(409).send('User already exists');
-        } else {
-            dal.create(name, email, password).then(user => {
-                console.log('User created:', user);
-                res.status(201).send(user);
-            });
+            return res.status(409).json({ success: false, message: 'User already exists' });
         }
-    }).catch(err => {
-        console.error('Error during user creation:', err);
-        res.status(500).send('Server error');
-    });
+
+        // Create new user
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new dal.User({
+            name,
+            email,
+            password: hashedPassword,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        });
+        await newUser.save();
+        console.log('User created:', newUser);
+
+        // Return success response
+        res.status(201).json({ success: true, user: newUser });
+
+    } catch (error) {
+        console.error('Error during user creation:', error);
+        res.status(500).json({ success: false, message: 'Server error', error });
+    }
+});
+
+app.post('/account/addtype', async (req, res) => {
+    const { email, type } = req.body;
+    console.log('Adding account type:', { email, type });
+
+    try {
+        const accountNumber = dal.generateAccountNumber();
+        const newAccount = {
+            type,
+            balance: 0,
+            accountNumber,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
+
+        const user = await dal.findOne(email);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        user.accounts.push(newAccount);
+        await user.save();
+
+        res.status(201).json({ success: true, user });
+    } catch (error) {
+        console.error('Error creating account type:', error);
+        res.status(500).json({ success: false, message: 'Account creation failed', error });
+    }
 });
 
 // Login user
@@ -112,63 +154,57 @@ app.patch('/account/update', function (req, res) {
 });
 
 app.patch('/account/deposit', async (req, res) => {
-    console.log('Deposit route called');
-    const { email, amount } = req.body;
-
-    if (!email || !amount) {
-        return res.status(400).json({ error: 'Email and amount are required.' });
-    }
-
+    const { email, amount, accountType } = req.body;
     try {
-        const updatedUser = await dal.deposit(email, Number(amount));
-        console.log('Deposit result:', updatedUser);
-        if (updatedUser) {
-            return res.json({ success: true, updatedUser });
-        } else {
-            return res.status(500).json({ success: false, message: 'Deposit error: user not found or update failed' });
-        }
-    } catch (err) {
-        console.error('Deposit error:', err);
-        res.status(500).json({ success: false, message: 'Server error', error: err });
-    }
-});
-
-app.patch('/account/withdraw', async (req, res) => {
-    console.log('Withdraw route called');
-    const { email, amount } = req.body;
-  
-    if (!email || !amount) {
-      return res.status(400).json({ error: 'Email and amount are required.' });
-    }
-  
-    try {
-      const updatedUser = await dal.withdraw(email, Number(amount));
-      console.log('Withdraw result:', updatedUser);
-      if (updatedUser) {
-        return res.json({ success: true, updatedUser });
-      } else {
-        return res.status(500).json({ success: false, message: 'Withdraw error: user not found or update failed' });
+      const user = await dal.findOne(email);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
       }
+      const account = user.accounts.find(acc => acc.type === accountType);
+      if (!account) {
+        return res.status(404).json({ error: `${accountType} account not found` });
+      }
+      account.balance += Number(amount);
+      await user.save();
+      res.json({ success: true, updatedUser: user });
+    } catch (err) {
+      console.error('Deposit error:', err);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
+  
+
+  app.patch('/account/withdraw', async (req, res) => {
+    const { email, amount, accountType } = req.body;
+    try {
+      const user = await dal.findOne(email);
+      const account = user.accounts.find(acc => acc.type === accountType);
+      if (account.balance < amount) {
+        return res.status(400).json({ success: false, message: 'Insufficient balance' });
+      }
+      account.balance -= amount;
+      user.updatedAt = new Date();
+      await user.save();
+      res.json({ success: true, updatedUser: user });
     } catch (err) {
       console.error('Withdraw error:', err);
       res.status(500).json({ success: false, message: 'Server error', error: err });
     }
   });
-  
 
 // All accounts
-app.get('/account/all', function (req, res) {
-    dal.all().then(docs => {
-        console.log('All accounts result:', docs);
-        res.send(docs);
-    }).catch(err => {
-        console.error('Error retrieving all users:', err);
-        res.status(500).send('Server error');
-    });
+app.get('/account/all', async (req, res) => {
+    try {
+        const users = await dal.all();
+        console.log('All accounts result:', users);
+        res.status(200).json(users);
+    } catch (error) {
+        console.error('Error retrieving all users:', error);
+        res.status(500).json({ success: false, message: 'Server error', error });
+    }
 });
 
 const port = 3000;
 app.listen(port, () => {
     console.log('Running on port:', port);
 });
-

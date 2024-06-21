@@ -62,28 +62,26 @@ function Spa() {
     }
   };
 
-  const handleDeposit = async (email, amount) => {
+  const handleDeposit = async (email, amount, accountType) => {
     try {
-        const response = await fetch('/account/deposit', {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ email, amount })
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || 'Failed to deposit');
-        }
-
+      const response = await fetch('/account/deposit', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, amount, accountType })
+      });
+      if (response.ok) {
         const data = await response.json();
-        return data.updatedUser;
-    } catch (err) {
-        console.error('Error making deposit:', err);
-        throw err;
+        setCurrentUser(data.updatedUser);
+        setUsers(prevUsers => prevUsers.map(user => user.email === email ? data.updatedUser : user));
+      } else {
+        throw new Error('Deposit failed');
+      }
+    } catch (error) {
+      throw error;
     }
-};
+  };
 
 const handleWithdraw = async (email, amount) => {
   try {
@@ -123,6 +121,7 @@ return (
         <Route path="/deposit/" component={Deposit} />
         <Route path="/withdraw/" component={Withdraw} />
         <Route path="/alldata/" component={AllData} />
+        <Route path="/profile/" component={Profile} />
       </div>
     </UserContext.Provider>
   </HashRouter>
@@ -135,6 +134,11 @@ ReactDOM.render(
 );
 
 
+  
+
+
+
+  
   
 
 
