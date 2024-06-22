@@ -14,11 +14,19 @@ const connectToDatabase = async () => {
     }
 };
 
+// Define Transaction Schema and Model
+const transactionSchema = new mongoose.Schema({
+    type: { type: String, required: true, enum: ['Deposit', 'Withdraw', 'Swap'] },
+    amount: { type: Number, required: true },
+    currency: { type: String, required: true }, // USD, BTC, etc.
+    date: { type: Date, default: Date.now }
+});
+
 // Define Account Schema and Model
 const accountSchema = new mongoose.Schema({
-    type: { type: String, required: true, enum: ['Checking', 'Savings'] },
+    type: { type: String, required: true, enum: ['Checking', 'Savings', 'Crypto'] },
     balance: { type: Number, required: true, default: 0 },
-    interestRate: { type: Number, default: 0 },
+    currency: { type: String, required: true, default: 'USD' }, // USD, BTC, etc.
     accountNumber: { type: String, required: true, unique: true },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
@@ -30,12 +38,14 @@ const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     accounts: [accountSchema],
+    transactions: [transactionSchema],
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
 
 const User = mongoose.model('User', userSchema);
 const Account = mongoose.model('Account', accountSchema);
+const Transaction = mongoose.model('Transaction', transactionSchema);
 
 // Generate a unique account number
 const generateAccountNumber = () => {
@@ -167,4 +177,4 @@ const calculateInterest = async () => {
     }
 };
 
-module.exports = { connectToDatabase, create, findOne, find, generateAccountNumber, deposit, withdraw, all, calculateInterest, addAccountType, User, Account };
+module.exports = { connectToDatabase, create, findOne, find, generateAccountNumber, deposit, withdraw, all, calculateInterest, addAccountType, User, Account, Transaction };

@@ -158,40 +158,58 @@ app.patch('/account/deposit', async (req, res) => {
     const { email, amount, accountType } = req.body;
     try {
       const user = await dal.findOne(email);
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
       const account = user.accounts.find(acc => acc.type === accountType);
       if (!account) {
-        return res.status(404).json({ error: `${accountType} account not found` });
+        return res.status(404).json({ success: false, message: 'Account not found' });
       }
-      account.balance += Number(amount);
+      account.balance += amount;
+      user.updatedAt = new Date();
+  
+      // Add transaction
+      user.transactions.push({
+        type: 'Deposit',
+        amount,
+        currency: 'USD', // Assuming USD for now
+        date: new Date()
+      });
+  
       await user.save();
       res.json({ success: true, updatedUser: user });
     } catch (err) {
       console.error('Deposit error:', err);
-      res.status(500).json({ error: 'Server error' });
+      res.status(500).json({ success: false, message: 'Server error', error: err });
     }
   });
-  
 
   app.patch('/account/withdraw', async (req, res) => {
     const { email, amount, accountType } = req.body;
     try {
       const user = await dal.findOne(email);
       const account = user.accounts.find(acc => acc.type === accountType);
+      if (!account) {
+        return res.status(404).json({ success: false, message: 'Account not found' });
+      }
       if (account.balance < amount) {
         return res.status(400).json({ success: false, message: 'Insufficient balance' });
       }
       account.balance -= amount;
       user.updatedAt = new Date();
+  
+      // Add transaction
+      user.transactions.push({
+        type: 'Withdraw',
+        amount,
+        currency: 'USD', // Assuming USD for now
+        date: new Date()
+      });
+  
       await user.save();
       res.json({ success: true, updatedUser: user });
     } catch (err) {
       console.error('Withdraw error:', err);
       res.status(500).json({ success: false, message: 'Server error', error: err });
     }
-  });
+  });  
 
 // All accounts
 app.get('/account/all', async (req, res) => {

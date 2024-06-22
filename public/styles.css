@@ -1,0 +1,25 @@
+/* styles.css */
+.list-group-item {
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  padding: 10px;
+  background-color: #ffffff; /* Background color for better visibility */
+  color: #000000; /* Text color for better visibility */
+}
+
+.card-header, .card-body {
+  color: #ffffff; /* Ensure text color is white for card headers and bodies */
+}
+
+.card-body .list-group-item {
+  background-color: #f8f9fa; /* Slightly different background for list items */
+}
+
+.status-message {
+  color: red; /* Status message color */
+}
+
+.card-title {
+  color: #ffffff; /* Card title color */
+}

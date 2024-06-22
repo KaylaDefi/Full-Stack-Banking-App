@@ -88,6 +88,7 @@ function Profile() {
                   Create Savings Account
                 </button>
               )}
+              <TransactionHistory />
             </>
           ) : (
             <div>Please log in to view and edit your profile.</div>
