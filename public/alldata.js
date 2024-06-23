@@ -24,7 +24,7 @@ function AllData() {
 
   return (
     <div className="container">
-      <h5>All Data in Store</h5>
+      <h5 style={{ color: '#007bff' }}>All Data in Store</h5>
       <div className="row">
         {users.map((user, index) => (
           <div className="col-sm-12 col-md-6 col-lg-4 mb-3" key={index}>

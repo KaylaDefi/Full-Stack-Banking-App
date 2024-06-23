@@ -4,6 +4,7 @@
   --card-bg-color: #ffffff;
   --card-header-bg-color: #007bff;
   --card-header-text-color: #fff;
+  --card-header-text-color: #007bff;
   --card-body-bg-color: #f8f9fa;
   --card-body-text-color: #343a40;
   --btn-primary-bg-color: #5799df;
@@ -23,8 +24,9 @@
   --card-bg-color: #424242;
   --card-header-bg-color: #555555;
   --card-header-text-color: #ffffff;
+  --card-title-text-color: #ffffff;
   --card-body-bg-color: #4f4f4f;
-  --card-body-text-color: #d3d3d3;
+  --card-body-text-color: #f9f7f7;
   --btn-primary-bg-color: #bb1c1c;
   --btn-primary-border-color: #bb1c1c;
   --btn-primary-text-color: #ffffff;
@@ -32,7 +34,7 @@
   --btn-secondary-border-color: #9c3f3f;
   --btn-secondary-text-color: #ffffff;
   --list-group-item-bg-color: #555555;
-  --list-group-item-text-color: #d3d3d3;
+  --list-group-item-text-color: #767182;
   --list-group-item-border-color: #777777;
 }
 
@@ -59,7 +61,7 @@ body, html {
   margin-bottom: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 700px; /* Adjusted max-width for a more balanced card */
+  max-width: 500px; /* Adjusted max-width for a more balanced card */
   width: 100%; /* Ensure the card takes the full width of its container */
   margin-left: auto;
   margin-right: auto;
@@ -85,7 +87,7 @@ body, html {
 
 /* Card titles */
 .card-title {
-  color: var(--card-header-bg-color); /* Blue color for titles */
+  color: var(--card-title-text-color); /* Blue color for titles */
   font-size: 1.5rem;
   margin-bottom: 15px;
 }
