@@ -114,7 +114,7 @@ return (
   <HashRouter>
     <UserContext.Provider value={{ users, setUsers, currentUser, setCurrentUser, loginUser, logoutUser, handleAccountUpdate, handleDeposit, handleWithdraw }}>
       <NavBar />
-      <div className="container" style={{ padding: "20px" }}>
+      <div className="container">
         <Route path="/" exact component={Home} />
         <Route path="/CreateAccount/" component={CreateAccount} />
         <Route path="/login/" component={Login} />
@@ -136,6 +136,14 @@ ReactDOM.render(
 
   
 
+
+
+  
+  
+
+
+
+  
 
 
   
