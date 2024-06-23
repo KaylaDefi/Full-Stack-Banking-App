@@ -64,13 +64,13 @@ function Profile() {
         status={status}
         body={
           currentUser ? (
-            <>
+            <div className="profile-card">
               <div>Email: {currentUser.email}</div>
-              <h3>Accounts</h3>
+              <h3 style={{ fontWeight: 'bold' }}>Accounts</h3>
               {accounts.length > 0 ? (
                 accounts.map(account => (
                   <div key={account._id}>
-                    <h4>{account.type} Account</h4>
+                    <h4 style={{ fontWeight: 'bold' }}>{account.type} Account</h4>
                     <p>Balance: ${account.balance.toFixed(2)}</p>
                     <p>Account Number: {account.accountNumber}</p>
                   </div>
@@ -79,7 +79,7 @@ function Profile() {
                 <p>No accounts found.</p>
               )}
               {!hasAccountType('Checking') && (
-                <button className="btn btn-primary" onClick={() => handleAccountTypeSelection('Checking')}>
+                <button className="btn btn-secondary" onClick={() => handleAccountTypeSelection('Checking')}>
                   Create Checking Account
                 </button>
               )}
@@ -89,7 +89,7 @@ function Profile() {
                 </button>
               )}
               <TransactionHistory />
-            </>
+            </div>
           ) : (
             <div>Please log in to view and edit your profile.</div>
           )

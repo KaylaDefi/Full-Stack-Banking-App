@@ -58,7 +58,7 @@ function Login() {
           onChange={e => setPassword(e.currentTarget.value)}
           required
         /><br />
-        <button type="submit" className="btn btn-light" onClick={handleLogin}>Login</button>
+        <button type="submit" className="btn btn-secondary" onClick={handleLogin}>Login</button>
         {status && <div className="status-message">{status}</div>}
       </>
     );
@@ -66,8 +66,8 @@ function Login() {
     const successMessage = (
       <>
         <p>{status}</p>
-        <button className="btn btn-light m-2" onClick={() => navigate('#/deposit/')}>Go to Deposit</button>
-        <button className="btn btn-light m-2" onClick={() => navigate('#/withdraw/')}>Go to Withdraw</button>
+        <button className="btn btn-secondary m-2" onClick={() => navigate('#/deposit/')}>Go to Deposit</button>
+        <button className="btn btn-secondary m-2" onClick={() => navigate('#/withdraw/')}>Go to Withdraw</button>
       </>
     );
   

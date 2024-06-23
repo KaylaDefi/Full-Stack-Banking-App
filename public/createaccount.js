@@ -112,14 +112,14 @@ function CreateAccount() {
             <input type="input" className="form-control" id="email" placeholder="Enter email" value={email} onChange={e => { setEmail(e.currentTarget.value); setIsFormValid(true); }} /><br />
             Password<br />
             <input type="password" className="form-control" id="password" placeholder="Enter password" value={password} onChange={e => { setPassword(e.currentTarget.value); setIsFormValid(true); }} /><br />
-            <button type="submit" className="btn btn-light" onClick={handleCreate} disabled={!isFormValid}>Create Account</button>
+            <button type="submit" className="btn btn-secondary" onClick={handleCreate} disabled={!isFormValid}>Create Account</button>
           </>
         ) : accountCreated ? (
           <>
             <h5>Success: Account Created!</h5>
             <p>Select account type:</p>
             <button className="btn btn-primary" onClick={() => handleAccountTypeSelection('Checking')}>Checking Account</button>
-            <button className="btn btn-secondary" onClick={() => handleAccountTypeSelection('Savings')}>Savings Account</button>
+            <button className="btn btn-primary" onClick={() => handleAccountTypeSelection('Savings')}>Savings Account</button>
           </>
         ) : null}
       />

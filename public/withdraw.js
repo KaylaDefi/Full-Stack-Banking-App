@@ -68,7 +68,7 @@ function Withdraw() {
           status="Please login to make a withdraw."
           body={(
             <div>
-              <button type="button" className="btn btn-light" onClick={handleGoToLogin}>
+              <button type="button" className="btn btn-secondary" onClick={handleGoToLogin}>
                 Go to Login
               </button>
             </div>
@@ -98,7 +98,7 @@ function Withdraw() {
               <option value="Savings" disabled={!hasAccountType('Savings')}>Savings</option>
             </select><br />
             <button type="submit"
-              className="btn btn-light mb-2"
+              className="btn btn-secondary mb-2"
               onClick={handleWithdrawClick}
               disabled={!withdraw}>Withdraw</button>
             {status && <div className="status-message">{status}</div>}

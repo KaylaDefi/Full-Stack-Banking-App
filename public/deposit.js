@@ -66,7 +66,7 @@ function Deposit() {
           status="Please login to make a deposit."
           body={(
             <div>
-              <button type="button" className="btn btn-light" onClick={handleGoToLogin}>
+              <button type="button" className="btn btn-secondary" onClick={handleGoToLogin}>
                 Go to Login
               </button>
             </div>
@@ -96,7 +96,7 @@ function Deposit() {
               <option value="Savings" disabled={!hasAccountType('Savings')}>Savings</option>
             </select><br />
             <button type="submit"
-              className="btn btn-light mb-2"
+              className="btn btn-secondary mb-2"
               onClick={handleDepositClick}
               disabled={!deposit}>Deposit</button>
             {status && <div className="status-message">{status}</div>}
