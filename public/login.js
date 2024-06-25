@@ -1,7 +1,7 @@
 function Login() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
-  const [totpCode, setTotpCode] = React.useState('');  // New state for TOTP code
+  const [totpCode, setTotpCode] = React.useState('');  
   const [status, setStatus] = React.useState('');
   const [showSuccess, setShowSuccess] = React.useState(false);
   const { setCurrentUser, loginUser } = React.useContext(UserContext);
@@ -14,13 +14,13 @@ function Login() {
           const response = await fetch('/account/login', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ email, password, totpCode })  // Include TOTP code
+              body: JSON.stringify({ email, password, totpCode })  
           });
           const data = await response.json();
           if (response.ok && data.success) {
               console.log("Login successful:", data.user);
               setCurrentUser(data.user);
-              setStatus('Login successful');
+              setStatus('Login successful!');
               setShowSuccess(true);
           } else {
               console.error("Login failed:", data.message);
@@ -33,7 +33,7 @@ function Login() {
   };
 
   const navigate = (path) => {
-    window.location.hash = path; // Use window.location.hash to navigate
+    window.location.hash = path; 
 };
 
   const loginForm = (

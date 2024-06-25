@@ -5,8 +5,8 @@ function CreateAccount() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [accountType, setAccountType] = React.useState('Checking');
-  const [qrCodeDataUrl, setQrCodeDataUrl] = React.useState(''); // New state for QR code
-  const [isFormValid, setIsFormValid] = React.useState(true); // Ensure form validation
+  const [qrCodeDataUrl, setQrCodeDataUrl] = React.useState(''); 
+  const [isFormValid, setIsFormValid] = React.useState(true); 
   const { setUsers } = React.useContext(UserContext);
 
   function validate(field, label) {
@@ -28,15 +28,14 @@ function CreateAccount() {
 
   async function handleCreate() {
       console.log(name, email, password);
-      let isValid = true; // Assume form is valid initially
+      let isValid = true;
 
-      // Validate all fields first before deciding if form is valid
       isValid = validate(name, 'Name') && isValid;
       isValid = validate(email, 'Email') && isValid;
       isValid = validate(password, 'Password') && isValid;
 
       if (!isValid) {
-          setIsFormValid(false); // Disable the submit button due to validation failure
+          setIsFormValid(false);
           return;
       }
 
@@ -51,7 +50,7 @@ function CreateAccount() {
           if (response.ok) {
               const data = await response.json();
               setUsers(prevUsers => [...prevUsers, data.user]);
-              setQrCodeDataUrl(data.qrCodeDataUrl); // Set QR code data URL
+              setQrCodeDataUrl(data.qrCodeDataUrl); 
               setShow(false);
               setStatus('Account created successfully! After scanning the QR code you may go to the login page.');
           } else {

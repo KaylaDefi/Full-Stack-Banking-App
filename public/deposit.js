@@ -4,7 +4,6 @@ function Deposit() {
     const [status, setStatus] = React.useState('');
     const { currentUser, setCurrentUser, handleDeposit, logoutUser } = React.useContext(UserContext);
   
-    // Log the currentUser as soon as the component function is called/rendered
     console.log("Current user in Deposit component:", currentUser);
   
     const getBalance = () => {
@@ -39,7 +38,7 @@ function Deposit() {
             const data = await response.json();
             setStatus(`Success: Deposit received into ${accountType} account`);
             setCurrentUser(data.updatedUser);
-            setDeposit(''); // Clear the deposit input field after successful deposit
+            setDeposit(''); 
           } else {
             const errorData = await response.json();
             setStatus(`Error: ${errorData.message}`);

@@ -40,20 +40,23 @@ function NavBar() {
             <li className="nav-item">
               <NavLink className="nav-link" to="/withdraw/" activeClassName="active" title="Withdraw money from your account.">Withdraw</NavLink>
             </li>
-            <li className="nav-item">
+            {/* <li className="nav-item">
               <NavLink className="nav-link" to="/alldata/" activeClassName="active" title="View all user inputs (bank staff only).">AllData</NavLink>
-            </li>
+            </li> */}
             {currentUser && (
               <li className="nav-item">
                 <NavLink className="nav-link" to="/profile/" activeClassName="active" title="View and update your profile.">Profile</NavLink>
               </li>
             )}
+            <li className="nav-item">
+              <NavLink className="nav-link" to="/crypto/" activeClassName="active" title="View current cryptocurrency prices.">Crypto</NavLink>
+            </li>
           </ul>
           <div className="ml-auto d-flex align-items-center">
             {currentUser && (
               <>
                 <span className="navbar-text mr-3">
-                  Welcome, {currentUser.name}
+                  Welcome, {currentUser.name}!
                 </span>
                 <button className="btn btn-outline-danger" onClick={logoutUser}>Logout</button>
               </>

@@ -53,7 +53,6 @@ function Spa() {
       const data = await response.json();
       if (data.success) {
         console.log('Account updated successfully:', data.response);
-        // Optionally refresh user data or update state here
       } else {
         console.error('Account update failed:', data.message);
       }
@@ -120,8 +119,9 @@ return (
         <Route path="/login/" component={Login} />
         <Route path="/deposit/" component={Deposit} />
         <Route path="/withdraw/" component={Withdraw} />
-        <Route path="/alldata/" component={AllData} />
+        {/*<Route path="/alldata/" component={AllData} />*/}
         <Route path="/profile/" component={Profile} />
+        <Route path="/crypto" component={Crypto} />
       </div>
     </UserContext.Provider>
   </HashRouter>

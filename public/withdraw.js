@@ -4,7 +4,6 @@ function Withdraw() {
     const [status, setStatus] = React.useState('');
     const { currentUser, setCurrentUser, handleWithdraw, logoutUser } = React.useContext(UserContext);
   
-    // Log the currentUser as soon as the component function is called/rendered
     console.log("Current user in Withdraw component:", currentUser);
   
     const getBalance = () => {
@@ -41,7 +40,7 @@ function Withdraw() {
             const data = await response.json();
             setStatus(`Success: Withdraw from ${accountType} account completed`);
             setCurrentUser(data.updatedUser);
-            setWithdraw(''); // Clear the withdraw input field after successful withdraw
+            setWithdraw(''); 
           } else {
             const errorData = await response.json();
             setStatus(`Error: ${errorData.message}`);

@@ -17,6 +17,8 @@
   --list-group-item-bg-color: #ffffff;
   --list-group-item-text-color: #343a40;
   --list-group-item-border-color: #ddd;
+  --crypto-item-text-color: #343a40;
+  --crypto-heading-text-color: #343a40;
 }
 
 /* Define CSS variables for dark mode */
@@ -39,6 +41,8 @@
   --list-group-item-bg-color: #555555;
   --list-group-item-text-color: #767182;
   --list-group-item-border-color: #777777;
+  --crypto-item-text-color: #f9f7f7;
+  --crypto-heading-text-color: #f9f7f7;
 }
 
 /* Set body and html to take full height and remove default margin and padding */
@@ -166,4 +170,37 @@ body, html {
 
 .navbar-text {
   margin-right: 15px;
+}
+
+.crypto-container {
+  padding: 20px;
+  background-color: var(--bg-color);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Add styles for the cryptocurrency heading */
+.crypto-heading {
+  text-align: center;
+  font-family: 'Playwrite DE Grund', sans-serif; 
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: var(--crypto-heading-text-color);
+}
+
+
+.crypto-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.crypto-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid var(--list-group-item-border-color);
+  border-radius: 5px;
+  color: var(--crypto-item-text-color);
 }

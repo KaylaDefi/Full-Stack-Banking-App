@@ -5,7 +5,6 @@ const uri = process.env.MONGODB_URI;
 const { authenticator } = require('otplib');
 const QRCode = require('qrcode');
 
-// Connect to the database
 const connectToDatabase = async () => {
     try {
         await mongoose.connect(uri);
@@ -16,7 +15,7 @@ const connectToDatabase = async () => {
     }
 };
 
-// Define Transaction Schema and Model
+// Transaction Schema and Model
 const transactionSchema = new mongoose.Schema({
     type: { type: String, required: true, enum: ['Deposit', 'Withdraw', 'Swap'] },
     amount: { type: Number, required: true },
@@ -24,12 +23,11 @@ const transactionSchema = new mongoose.Schema({
     date: { type: Date, default: Date.now }
 });
 
-// Generate a unique account number
 const generateAccountNumber = () => {
     return 'ACC' + Math.floor(1000000000 + Math.random() * 9000000000);
 };
 
-// Define Account Schema and Model
+// Account Schema and Model
 const accountSchema = new mongoose.Schema({
     type: { type: String, required: true, enum: ['Checking', 'Savings', 'Crypto'] },
     balance: { type: Number, required: true, default: 0 },
@@ -39,7 +37,7 @@ const accountSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now }
 });
 
-// Define User Schema and Model
+// User Schema and Model
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
@@ -57,8 +55,8 @@ const Transaction = mongoose.model('Transaction', transactionSchema);
 
 const create = async (name, email, password, accountType) => {
     try {
-        const hashedPassword = await bcrypt.hash(password, 10); // Hash the password with salt rounds of 10
-        const totpSecret = authenticator.generateSecret(); // Generate TOTP secret
+        const hashedPassword = await bcrypt.hash(password, 10); 
+        const totpSecret = authenticator.generateSecret(); 
         const user = new User({
             name,
             email,
@@ -71,7 +69,7 @@ const create = async (name, email, password, accountType) => {
                     type: accountType,
                     balance: 0,
                     currency: 'USD',
-                    accountNumber: generateAccountNumber(), // Ensure account number is generated
+                    accountNumber: generateAccountNumber(), 
                     createdAt: new Date(),
                     updatedAt: new Date()
                 }
@@ -104,7 +102,7 @@ const addAccountType = async (email, accountType) => {
         const newAccount = {
             type: accountType,
             balance: 0,
-            accountNumber: generateAccountNumber(), // Ensure account number is generated
+            accountNumber: generateAccountNumber(), 
             createdAt: new Date(),
             updatedAt: new Date()
         };
@@ -132,7 +130,7 @@ const findOne = async (email) => {
     try {
         console.log('findOne called with email:', email);
         const user = await User.findOne({ email }).exec();
-        console.log('findOne result:', user); // Log the result
+        console.log('findOne result:', user); 
         return user;
     } catch (err) {
         console.error('Error fetching user:', err);

@@ -5,20 +5,17 @@ const cors = require('cors');
 const dal = require('./dal.js');
 const { authenticator } = require('otplib');
 
-// Middleware setup
 app.use(express.static('public'));
 app.use(cors());
 app.use(express.json()); 
 
-// Connect to database
 dal.connectToDatabase()
    .then(() => {
        console.log('Database is ready');
-       // Start express server or other application logic
    })
    .catch(err => {
        console.error('Database connection failed:', err);
-       process.exit(1); // Exit the app if the database connection fails
+       process.exit(1);
    });
 
 // Create user account
@@ -59,7 +56,7 @@ app.post('/account/addtype', async (req, res) => {
 
 // Login user
 app.post('/account/login', async (req, res) => {
-    const { email, password, totpCode } = req.body;  // Expect TOTP code in the request body
+    const { email, password, totpCode } = req.body;  
     console.log('Login attempt for:', email);
 
     try {
@@ -121,19 +118,6 @@ app.get('/account/findOne/:email', function (req, res) {
     });
 });
 
-// Update - deposit/withdraw amount
-app.patch('/account/update', function (req, res) {
-    const { email, amount } = req.body;
-
-    dal.update(email, Number(amount)).then(response => {
-        console.log('Update result:', response);
-        res.json({ success: true, response });
-    }).catch(err => {
-        console.error('Update error:', err);
-        res.status(500).json({ success: false, message: 'Update error', error: err });
-    });
-});
-
 app.patch('/account/deposit', async (req, res) => {
     const { email, amount, accountType } = req.body;
     try {
@@ -145,7 +129,6 @@ app.patch('/account/deposit', async (req, res) => {
       account.balance += amount;
       user.updatedAt = new Date();
   
-      // Add transaction
       user.transactions.push({
         type: 'Deposit',
         amount,
@@ -175,7 +158,6 @@ app.patch('/account/deposit', async (req, res) => {
       account.balance -= amount;
       user.updatedAt = new Date();
   
-      // Add transaction
       user.transactions.push({
         type: 'Withdraw',
         amount,
