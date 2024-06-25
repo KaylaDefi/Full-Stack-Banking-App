@@ -2,6 +2,9 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const uri = process.env.MONGODB_URI;
+const { authenticator } = require('otplib');
+const QRCode = require('qrcode');
+
 
 // Connect to the database
 const connectToDatabase = async () => {
@@ -37,6 +40,7 @@ const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    totpSecret: { type: String, required: false }, 
     accounts: [accountSchema],
     transactions: [transactionSchema],
     createdAt: { type: Date, default: Date.now },
@@ -55,16 +59,23 @@ const generateAccountNumber = () => {
 const create = async (name, email, password) => {
     try {
         const hashedPassword = await bcrypt.hash(password, 10); // Hash the password with salt rounds of 10
+        const totpSecret = authenticator.generateSecret(); // Generate TOTP secret
         const user = new User({
             name,
             email,
             password: hashedPassword,
+            totpSecret,  // Save TOTP secret
             createdAt: new Date(),
             updatedAt: new Date()
         });
 
         await user.save();
-        return user;
+
+        // Generate QR code for TOTP
+        const totpUri = authenticator.keyuri(email, 'YourBankApp', totpSecret);
+        const qrCodeDataUrl = await QRCode.toDataURL(totpUri);
+
+        return { user, qrCodeDataUrl };
     } catch (err) {
         console.error('Error creating user:', err);
         throw err;

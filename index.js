@@ -3,6 +3,7 @@ const app = express();
 const bcrypt = require('bcryptjs');
 const cors = require('cors');
 const dal = require('./dal.js');
+const { authenticator } = require('otplib');
 
 // Middleware setup
 app.use(express.static('public'));
@@ -26,27 +27,16 @@ app.post('/account/create', async (req, res) => {
     console.log('Creating user:', { name, email, password });
 
     try {
-        // Check if user already exists
         const existingUsers = await dal.find(email);
         if (existingUsers.length > 0) {
             console.log('User already exists:', email);
             return res.status(409).json({ success: false, message: 'User already exists' });
         }
 
-        // Create new user
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new dal.User({
-            name,
-            email,
-            password: hashedPassword,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        });
-        await newUser.save();
-        console.log('User created:', newUser);
+        const { user, qrCodeDataUrl } = await dal.create(name, email, password);
+        console.log('User created:', user);
 
-        // Return success response
-        res.status(201).json({ success: true, user: newUser });
+        res.status(201).json({ success: true, user, qrCodeDataUrl });
 
     } catch (error) {
         console.error('Error during user creation:', error);
@@ -85,33 +75,40 @@ app.post('/account/addtype', async (req, res) => {
 });
 
 // Login user
-app.post('/account/login', function (req, res) {
-    const { email, password } = req.body;
+app.post('/account/login', async (req, res) => {
+    const { email, password, totpCode } = req.body;  // Expect TOTP code in the request body
     console.log('Login attempt for:', email);
 
-    dal.findOne(email).then(user => {
+    try {
+        const user = await dal.findOne(email);
         if (!user) {
             console.error('Login failed: User not found');
             return res.status(404).json({ success: false, message: 'User not found' });
         }
         console.log('User found for login:', user);
-        bcrypt.compare(password, user.password, function(err, result) {
-            if (err) {
-                console.error('Bcrypt comparison error:', err);
-                return res.status(500).json({ success: false, message: 'Server error', error: err });
-            }
-            if (result) {
-                res.json({ success: true, message: 'Login successful', user });
-            } else {
-                console.error('Login failed: Incorrect password for user', email);
-                res.status(401).json({ success: false, message: 'Login failed: wrong credentials' });
-            }
-        });
-    }).catch(err => {
+
+        const passwordMatch = await bcrypt.compare(password, user.password);
+        if (!passwordMatch) {
+            console.error('Login failed: Incorrect password for user', email);
+            return res.status(401).json({ success: false, message: 'Login failed: wrong credentials' });
+        }
+
+        // Verify TOTP code
+        console.log('Verifying TOTP code:', totpCode);
+        const isValid = authenticator.check(totpCode, user.totpSecret);
+        console.log('TOTP validation result:', isValid);
+        if (!isValid) {
+            console.error('Login failed: Invalid TOTP code for user', email);
+            return res.status(401).json({ success: false, message: 'Login failed: Invalid TOTP code' });
+        }
+
+        res.json({ success: true, message: 'Login successful', user });
+    } catch (err) {
         console.error('Server error during login:', err);
         res.status(500).json({ success: false, message: 'Server error', error: err });
-    });
+    }
 });
+
 
 // Find user account
 app.get('/account/find/:email', function (req, res) {

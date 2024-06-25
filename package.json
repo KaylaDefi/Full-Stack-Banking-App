@@ -16,6 +16,8 @@
     "express": "^4.19.2",
     "lowdb": "^7.0.1",
     "mongodb": "^6.7.0",
-    "mongoose": "^8.4.3"
+    "mongoose": "^8.4.3",
+    "otplib": "^12.0.1",
+    "qrcode": "^1.5.3"
   }
 }
