@@ -1,10 +1,11 @@
 /* Define CSS variables for light mode */
 :root {
   --bg-color: #ffffff;
+  --navbar-bg-color: #f8f9fa; 
+  --navbar-text-color: #343a40;
   --card-bg-color: #ffffff;
   --card-header-bg-color: #007bff;
   --card-header-text-color: #fff;
-  --card-header-text-color: #007bff;
   --card-body-bg-color: #f8f9fa;
   --card-body-text-color: #343a40;
   --btn-primary-bg-color: #5799df;
@@ -21,6 +22,8 @@
 /* Define CSS variables for dark mode */
 .dark-mode {
   --bg-color: #343a40;
+  --navbar-bg-color: #424242; 
+  --navbar-text-color: #ffffff; 
   --card-bg-color: #424242;
   --card-header-bg-color: #555555;
   --card-header-text-color: #ffffff;
@@ -51,9 +54,9 @@ body, html {
 .container {
   padding: 20px;
   background-color: var(--bg-color);
-  min-height: 100vh; /* Ensure the container takes up the full viewport height */
+  min-height: 100vh; 
   min-width: 100vw;
-  box-sizing: border-box; /* Include padding in the height and width calculations */
+  box-sizing: border-box; 
 }
 
 /* General card styling */
@@ -61,34 +64,31 @@ body, html {
   margin-bottom: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 500px; /* Adjusted max-width for a more balanced card */
-  width: 100%; /* Ensure the card takes the full width of its container */
+  max-width: 500px; 
+  width: 100%; 
   margin-left: auto;
   margin-right: auto;
-  background-color: var(--card-bg-color); /* White background for cards */
+  background-color: var(--card-bg-color); 
 }
 
-/* Card header styling */
 .card-header {
-  background-color: var(--card-header-bg-color); /* Blue background for header */
+  background-color: var(--card-header-bg-color); 
   color: var(--card-header-text-color);
   font-size: 1.25rem;
   font-weight: bold;
   text-align: center;
-  border-bottom: 1px solid #dee2e6; /* Add border to separate header */
+  font-family: 'Playwrite DE Grund', sans-serif;
+  border-bottom: 1px solid #dee2e6; 
 }
 
-/* Card body styling */
 .card-body {
   padding: 20px;
-  background-color: var(--card-body-bg-color); /* Light grey background for card body */
+  background-color: var(--card-body-bg-color); 
   color: var(--card-body-text-color);
 }
 
-/* Card titles */
 .card-title {
-  color: var(--card-title-text-color); /* Blue color for titles */
-  font-size: 1.5rem;
+  color: var(--card-title-text-color); 
   margin-bottom: 15px;
 }
 
@@ -125,10 +125,41 @@ body, html {
 
 /* List group item styling */
 .list-group-item {
-  background-color: var(--list-group-item-bg-color); /* White background for list items */
+  background-color: var(--list-group-item-bg-color); 
   color: var(--list-group-item-text-color);
   border: 1px solid var(--list-group-item-border-color);
   border-radius: 5px;
   margin-bottom: 10px;
   padding: 10px;
+}
+
+/* Navbar styling */
+.navbar {
+  background-color: var(--navbar-bg-color);
+  color: var(--navbar-text-color);
+}
+
+.navbar-brand {
+  font-family: 'Playwrite DE Grund', sans-serif; 
+  font-size: 1.5rem; 
+  color: var(--navbar-text-color);
+}
+
+.nav-link {
+  color: var(--navbar-text-color);
+  font-family: 'Playwrite DE Grund', sans-serif;
+}
+
+.nav-link:hover {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.active {
+  color: var(--navbar-text-color) !important;
+  background-color: var(--navbar-bg-color);
+}
+
+.navbar-text {
+  margin-right: 15px;
 }
