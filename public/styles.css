@@ -123,6 +123,10 @@ body, html {
   border-color: #004085;
 }
 
+.button-spacing {
+  margin-right: 27px; 
+}
+
 /* List group item styling */
 .list-group-item {
   background-color: var(--list-group-item-bg-color); 

@@ -23,8 +23,8 @@ dal.connectToDatabase()
 
 // Create user account
 app.post('/account/create', async (req, res) => {
-    const { name, email, password } = req.body;
-    console.log('Creating user:', { name, email, password });
+    const { name, email, password, accountType } = req.body;
+    console.log('Creating user:', { name, email, password, accountType });
 
     try {
         const existingUsers = await dal.find(email);
@@ -33,7 +33,7 @@ app.post('/account/create', async (req, res) => {
             return res.status(409).json({ success: false, message: 'User already exists' });
         }
 
-        const { user, qrCodeDataUrl } = await dal.create(name, email, password);
+        const { user, qrCodeDataUrl } = await dal.create(name, email, password, accountType);
         console.log('User created:', user);
 
         res.status(201).json({ success: true, user, qrCodeDataUrl });
@@ -49,24 +49,7 @@ app.post('/account/addtype', async (req, res) => {
     console.log('Adding account type:', { email, type });
 
     try {
-        const accountNumber = dal.generateAccountNumber();
-        const newAccount = {
-            type,
-            balance: 0,
-            interestRate: type === 'Savings' ? 0.02 : 0,
-            accountNumber,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        };
-
-        const user = await dal.findOne(email);
-        if (!user) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
-        user.accounts.push(newAccount);
-        user.updatedAt = new Date();
-        await user.save();
-
+        const user = await dal.addAccountType(email, type);
         res.status(201).json({ success: true, user });
     } catch (error) {
         console.error('Error creating account type:', error);

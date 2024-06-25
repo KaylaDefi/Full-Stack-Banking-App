@@ -5,7 +5,6 @@ const uri = process.env.MONGODB_URI;
 const { authenticator } = require('otplib');
 const QRCode = require('qrcode');
 
-
 // Connect to the database
 const connectToDatabase = async () => {
     try {
@@ -25,12 +24,17 @@ const transactionSchema = new mongoose.Schema({
     date: { type: Date, default: Date.now }
 });
 
+// Generate a unique account number
+const generateAccountNumber = () => {
+    return 'ACC' + Math.floor(1000000000 + Math.random() * 9000000000);
+};
+
 // Define Account Schema and Model
 const accountSchema = new mongoose.Schema({
     type: { type: String, required: true, enum: ['Checking', 'Savings', 'Crypto'] },
     balance: { type: Number, required: true, default: 0 },
     currency: { type: String, required: true, default: 'USD' }, // USD, BTC, etc.
-    accountNumber: { type: String, required: true, unique: true },
+    accountNumber: { type: String, required: true, unique: true, default: generateAccountNumber },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
@@ -51,12 +55,7 @@ const User = mongoose.model('User', userSchema);
 const Account = mongoose.model('Account', accountSchema);
 const Transaction = mongoose.model('Transaction', transactionSchema);
 
-// Generate a unique account number
-const generateAccountNumber = () => {
-    return 'ACC' + Math.floor(1000000000 + Math.random() * 9000000000);
-};
-
-const create = async (name, email, password) => {
+const create = async (name, email, password, accountType) => {
     try {
         const hashedPassword = await bcrypt.hash(password, 10); // Hash the password with salt rounds of 10
         const totpSecret = authenticator.generateSecret(); // Generate TOTP secret
@@ -66,13 +65,23 @@ const create = async (name, email, password) => {
             password: hashedPassword,
             totpSecret,  // Save TOTP secret
             createdAt: new Date(),
-            updatedAt: new Date()
+            updatedAt: new Date(),
+            accounts: [
+                {
+                    type: accountType,
+                    balance: 0,
+                    currency: 'USD',
+                    accountNumber: generateAccountNumber(), // Ensure account number is generated
+                    createdAt: new Date(),
+                    updatedAt: new Date()
+                }
+            ]
         });
 
         await user.save();
 
         // Generate QR code for TOTP
-        const totpUri = authenticator.keyuri(email, 'YourBankApp', totpSecret);
+        const totpUri = authenticator.keyuri(email, 'Wild Frontier Bank', totpSecret);
         const qrCodeDataUrl = await QRCode.toDataURL(totpUri);
 
         return { user, qrCodeDataUrl };
@@ -95,11 +104,13 @@ const addAccountType = async (email, accountType) => {
         const newAccount = {
             type: accountType,
             balance: 0,
-            accountNumber: generateAccountNumber(),
-            interestRate: accountType === 'Savings' ? 0.01 : 0 // 1% interest rate for savings
+            accountNumber: generateAccountNumber(), // Ensure account number is generated
+            createdAt: new Date(),
+            updatedAt: new Date()
         };
 
         user.accounts.push(newAccount);
+        user.updatedAt = new Date();
         await user.save();
         return user;
     } catch (err) {
