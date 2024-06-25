@@ -119,7 +119,8 @@ return (
         <Route path="/login/" component={Login} />
         <Route path="/deposit/" component={Deposit} />
         <Route path="/withdraw/" component={Withdraw} />
-        {/*<Route path="/alldata/" component={AllData} />*/}
+        <Route path="/transfer/" component={Transfer} />
+        <Route path="/alldata/" component={AllData} />
         <Route path="/profile/" component={Profile} />
         <Route path="/crypto" component={Crypto} />
       </div>

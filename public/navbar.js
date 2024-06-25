@@ -40,9 +40,12 @@ function NavBar() {
             <li className="nav-item">
               <NavLink className="nav-link" to="/withdraw/" activeClassName="active" title="Withdraw money from your account.">Withdraw</NavLink>
             </li>
-            {/* <li className="nav-item">
+            <li className="nav-item">
+              <NavLink className="nav-link" to="/transfer/" activeClassName="active" title="Transfer money to another account.">Transfer</NavLink>
+            </li>
+            <li className="nav-item">
               <NavLink className="nav-link" to="/alldata/" activeClassName="active" title="View all user inputs (bank staff only).">AllData</NavLink>
-            </li> */}
+            </li>
             {currentUser && (
               <li className="nav-item">
                 <NavLink className="nav-link" to="/profile/" activeClassName="active" title="View and update your profile.">Profile</NavLink>

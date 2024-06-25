@@ -173,6 +173,58 @@ app.patch('/account/deposit', async (req, res) => {
     }
   });  
 
+  app.post('/account/transfer', async (req, res) => {
+    const { fromEmail, fromAccountType, toAccountNumber, amount } = req.body;
+
+    try {
+        const fromUser = await dal.findOne(fromEmail);
+        const toUser = await dal.findOneByAccountNumber(toAccountNumber);
+
+        if (!fromUser || !toUser) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const fromAccount = fromUser.accounts.find(acc => acc.type === fromAccountType);
+        const toAccount = toUser.accounts.find(acc => acc.accountNumber === toAccountNumber);
+
+        if (!fromAccount || !toAccount) {
+            return res.status(404).json({ success: false, message: 'Account not found' });
+        }
+
+        if (fromAccount.balance < amount) {
+            return res.status(400).json({ success: false, message: 'Insufficient funds' });
+        }
+
+        fromAccount.balance -= amount;
+        toAccount.balance += amount;
+
+        // Create transaction records
+        fromUser.transactions.push({
+            type: 'Transfer Out',
+            amount: amount,
+            currency: fromAccount.currency,
+            date: new Date(),
+            toAccountNumber: toAccountNumber
+        });
+
+        toUser.transactions.push({
+            type: 'Transfer In',
+            amount: amount,
+            currency: toAccount.currency,
+            date: new Date(),
+            fromAccountNumber: fromAccount.accountNumber
+        });
+
+        await fromUser.save();
+        await toUser.save();
+
+        res.status(200).json({ success: true, message: 'Transfer successful' });
+    } catch (error) {
+        console.error('Transfer error:', error);
+        res.status(500).json({ success: false, message: 'Server error', error });
+    }
+});
+
 // All accounts
 app.get('/account/all', async (req, res) => {
     try {

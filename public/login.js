@@ -75,6 +75,8 @@ function Login() {
           <p>{status}</p>
           <button className="btn btn-secondary m-2" onClick={() => navigate('#/deposit/')}>Go to Deposit</button>
           <button className="btn btn-secondary m-2" onClick={() => navigate('#/withdraw/')}>Go to Withdraw</button>
+          <button className="btn btn-secondary m-2" onClick={() => navigate('#/transfer/')}>Send Money</button>
+          <button className="btn btn-secondary m-2" onClick={() => navigate('#/profile/')}>View Profile</button>
       </>
   );
 

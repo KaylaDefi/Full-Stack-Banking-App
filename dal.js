@@ -17,7 +17,7 @@ const connectToDatabase = async () => {
 
 // Transaction Schema and Model
 const transactionSchema = new mongoose.Schema({
-    type: { type: String, required: true, enum: ['Deposit', 'Withdraw', 'Swap'] },
+    type: { type: String, required: true, enum: ['Deposit', 'Withdraw', 'Swap', 'Transfer Out', 'Transfer In'] },
     amount: { type: Number, required: true },
     currency: { type: String, required: true }, // USD, BTC, etc.
     date: { type: Date, default: Date.now }
@@ -170,6 +170,15 @@ const withdraw = async (email, amount) => {
     }
 };
 
+const findOneByAccountNumber = async (accountNumber) => {
+    try {
+        return await User.findOne({ 'accounts.accountNumber': accountNumber }).exec();
+    } catch (err) {
+        console.error('Error fetching user by account number:', err);
+        throw err;
+    }
+};
+
 const all = async () => {
     try {
         return await User.find({}).exec();
@@ -197,4 +206,4 @@ const calculateInterest = async () => {
     }
 };
 
-module.exports = { connectToDatabase, create, findOne, find, generateAccountNumber, deposit, withdraw, all, calculateInterest, addAccountType, User, Account, Transaction };
+module.exports = { connectToDatabase, create, findOne, find, generateAccountNumber, deposit, withdraw, findOneByAccountNumber, all, calculateInterest, addAccountType, User, Account, Transaction };
