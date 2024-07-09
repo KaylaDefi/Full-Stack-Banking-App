@@ -5,8 +5,7 @@ function CreateAccount() {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [accountType, setAccountType] = React.useState('Checking');
-  const [qrCodeDataUrl, setQrCodeDataUrl] = React.useState(''); 
-  const [isFormValid, setIsFormValid] = React.useState(true); 
+  const [isFormValid, setIsFormValid] = React.useState(true);
   const { setUsers } = React.useContext(UserContext);
 
   function validate(field, label) {
@@ -50,9 +49,8 @@ function CreateAccount() {
           if (response.ok) {
               const data = await response.json();
               setUsers(prevUsers => [...prevUsers, data.user]);
-              setQrCodeDataUrl(data.qrCodeDataUrl); 
               setShow(false);
-              setStatus('Account created successfully! After scanning the QR code you may go to the login page.');
+              setStatus('Account created successfully!');
           } else {
               const errorData = await response.json();
               setStatus(`Error: ${errorData.message}`);
@@ -64,45 +62,35 @@ function CreateAccount() {
       }
   }
 
-  function clearForm() {
-      setName('');
-      setEmail('');
-      setPassword('');
-      setAccountType('Checking');
-      setShow(true);
-      setStatus('');
+  function goToLogin() {
+      window.location.hash = '#/login';
   }
 
   return (
-    <Card
-      bgcolor="primary"
-      header="Create Account"
-      status={status}
-      body={show ? (
-        <>
-          Name<br />
-          <input type="input" className="form-control" id="name" placeholder="Enter name" value={name} onChange={e => { setName(e.currentTarget.value); setIsFormValid(true); }} /><br />
-          Email address<br />
-          <input type="input" className="form-control" id="email" placeholder="Enter email" value={email} onChange={e => { setEmail(e.currentTarget.value); setIsFormValid(true); }} /><br />
-          Password<br />
-          <input type="password" className="form-control" id="password" placeholder="Enter password" value={password} onChange={e => { setPassword(e.currentTarget.value); setIsFormValid(true); }} /><br />
-          Account Type<br />
-          <select className="form-control" value={accountType} onChange={e => setAccountType(e.currentTarget.value)}>
-            <option value="Checking">Checking</option>
-            <option value="Savings">Savings</option>
-          </select><br />
-          <button type="submit" className="btn btn-secondary" onClick={handleCreate} disabled={!isFormValid}>Create Account</button>
-        </>
-      ) : (
-        qrCodeDataUrl ? (
-          <>
-            <h5 style={{ textAlign: 'center' }}>Scan the QR code with your authenticator app:</h5>
-            <br />
-            <img src={qrCodeDataUrl} alt="QR Code" style={{ display: 'block', margin: '0 auto' }} />
-            <br />
-          </>
-        ) : null
-      )}
-    />
+      <Card
+          bgcolor="primary"
+          header="Create Account"
+          status={status}
+          body={show ? (
+              <>
+                  Name<br />
+                  <input type="input" className="form-control" id="name" placeholder="Enter name" value={name} onChange={e => { setName(e.currentTarget.value); setIsFormValid(true); }} /><br />
+                  Email address<br />
+                  <input type="input" className="form-control" id="email" placeholder="Enter email" value={email} onChange={e => { setEmail(e.currentTarget.value); setIsFormValid(true); }} /><br />
+                  Password<br />
+                  <input type="password" className="form-control" id="password" placeholder="Enter password" value={password} onChange={e => { setPassword(e.currentTarget.value); setIsFormValid(true); }} /><br />
+                  Account Type<br />
+                  <select className="form-control" value={accountType} onChange={e => setAccountType(e.currentTarget.value)}>
+                      <option value="Checking">Checking</option>
+                      <option value="Savings">Savings</option>
+                  </select><br />
+                  <button type="submit" className="btn btn-secondary" onClick={handleCreate} disabled={!isFormValid}>Create Account</button>
+              </>
+          ) : (
+              <>
+                  <button type="button" className="btn btn-secondary" onClick={goToLogin}>Go To Login</button>
+              </>
+          )}
+      />
   );
 }

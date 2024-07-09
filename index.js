@@ -4,6 +4,8 @@ const bcrypt = require('bcryptjs');
 const cors = require('cors');
 const dal = require('./dal.js');
 const { authenticator } = require('otplib');
+const QRCode = require('qrcode');
+const { User } = require('./dal'); 
 
 app.use(express.static('public'));
 app.use(cors());
@@ -30,10 +32,10 @@ app.post('/account/create', async (req, res) => {
             return res.status(409).json({ success: false, message: 'User already exists' });
         }
 
-        const { user, qrCodeDataUrl } = await dal.create(name, email, password, accountType);
+        const user = await dal.create(name, email, password, accountType);
         console.log('User created:', user);
 
-        res.status(201).json({ success: true, user, qrCodeDataUrl });
+        res.status(201).json({ success: true, user });
 
     } catch (error) {
         console.error('Error during user creation:', error);
@@ -41,22 +43,43 @@ app.post('/account/create', async (req, res) => {
     }
 });
 
-app.post('/account/addtype', async (req, res) => {
-    const { email, type } = req.body;
-    console.log('Adding account type:', { email, type });
-
+// Enable 2FA
+app.post('/account/enable-2fa', async (req, res) => {
+    const { email } = req.body;
     try {
-        const user = await dal.addAccountType(email, type);
-        res.status(201).json({ success: true, user });
-    } catch (error) {
-        console.error('Error creating account type:', error);
-        res.status(500).json({ success: false, message: 'Account creation failed', error });
+        const secret = authenticator.generateSecret();
+        const updatedUser = await dal.User.findOneAndUpdate(
+            { email },
+            { totpSecret: secret, twoFactorEnabled: true },
+            { new: true }
+        );
+        const uri = authenticator.keyuri(email, 'Wild Frontier Bank', secret);
+        const qrCodeDataUrl = await QRCode.toDataURL(uri);
+        res.json({ qrCodeDataUrl, totpSecret: secret });
+    } catch (err) {
+        console.error('Failed to enable 2FA:', err);
+        res.status(500).json({ message: 'Failed to enable 2FA' });
+    }
+});
+
+// Disable 2FA
+app.post('/account/disable-2fa', async (req, res) => {
+    const { email } = req.body;
+    try {
+        await dal.User.findOneAndUpdate(
+            { email },
+            { $unset: { totpSecret: "" }, twoFactorEnabled: false },
+            { new: true }
+        );
+        res.json({ message: '2FA disabled' });
+    } catch (err) {
+        res.status(500).json({ message: 'Failed to disable 2FA' });
     }
 });
 
 // Login user
 app.post('/account/login', async (req, res) => {
-    const { email, password, totpCode } = req.body;  
+    const { email, password } = req.body;  
     console.log('Login attempt for:', email);
 
     try {
@@ -73,13 +96,12 @@ app.post('/account/login', async (req, res) => {
             return res.status(401).json({ success: false, message: 'Login failed: wrong credentials' });
         }
 
-        // Verify TOTP code
-        console.log('Verifying TOTP code:', totpCode);
-        const isValid = authenticator.check(totpCode, user.totpSecret);
-        console.log('TOTP validation result:', isValid);
-        if (!isValid) {
-            console.error('Login failed: Invalid TOTP code for user', email);
-            return res.status(401).json({ success: false, message: 'Login failed: Invalid TOTP code' });
+        console.log('Password match for user:', email);
+
+        // If 2FA is enabled, notify the client to prompt for the TOTP code
+        if (user.twoFactorEnabled) {
+            console.log('User has 2FA enabled:', email);
+            return res.json({ success: true, user, requiresTotp: true });
         }
 
         res.json({ success: true, message: 'Login successful', user });
@@ -89,6 +111,32 @@ app.post('/account/login', async (req, res) => {
     }
 });
 
+// Verify TOTP code
+app.post('/account/verify-totp', async (req, res) => {
+    const { email, totpCode } = req.body;
+    console.log('Verifying TOTP code for email:', email);
+
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            console.error('User not found for TOTP verification');
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        const isValid = authenticator.check(totpCode, user.totpSecret);
+        console.log('TOTP validation result for user:', isValid);
+
+        if (!isValid) {
+            console.error('Invalid TOTP code for user:', email);
+            return res.status(401).json({ success: false, message: 'Invalid TOTP code' });
+        }
+
+        res.json({ success: true, message: 'TOTP verification successful', user });
+    } catch (err) {
+        console.error('Server error during TOTP verification:', err);
+        res.status(500).json({ success: false, message: 'Server error', error: err });
+    }
+});
 
 // Find user account
 app.get('/account/find/:email', function (req, res) {
@@ -128,14 +176,14 @@ app.patch('/account/deposit', async (req, res) => {
       }
       account.balance += amount;
       user.updatedAt = new Date();
-  
+
       user.transactions.push({
         type: 'Deposit',
         amount,
         currency: 'USD', // Assuming USD for now
         date: new Date()
       });
-  
+
       await user.save();
       res.json({ success: true, updatedUser: user });
     } catch (err) {
@@ -157,14 +205,14 @@ app.patch('/account/deposit', async (req, res) => {
       }
       account.balance -= amount;
       user.updatedAt = new Date();
-  
+
       user.transactions.push({
         type: 'Withdraw',
         amount,
         currency: 'USD', // Assuming USD for now
         date: new Date()
       });
-  
+
       await user.save();
       res.json({ success: true, updatedUser: user });
     } catch (err) {

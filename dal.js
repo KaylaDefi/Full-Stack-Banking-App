@@ -43,6 +43,7 @@ const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     totpSecret: { type: String, required: false }, 
+    twoFactorEnabled: { type: Boolean, default: false },
     accounts: [accountSchema],
     transactions: [transactionSchema],
     createdAt: { type: Date, default: Date.now },
